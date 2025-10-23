@@ -59,51 +59,48 @@ const TournamentBracket = ({ matches }: TournamentBracketProps) => {
   };
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_1.2fr] gap-4">
-        <div className="space-y-3">
-          <div className="text-center mb-4">
+    <div className="w-full max-w-[1200px] mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr_1fr] gap-8">
+        
+        <div>
+          <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-primary tracking-tight">ЧЕТВЕРТЬФИНАЛ</h2>
             <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
           </div>
-          {quarterMatches.slice(0, 2).map((match) => (
-            <MatchBox key={match.id} match={match} />
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold text-primary tracking-tight opacity-0">ЧЕТВЕРТЬФИНАЛ</h2>
-            <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full opacity-0"></div>
+          <div className="space-y-6">
+            {quarterMatches.map((match) => (
+              <MatchBox key={match.id} match={match} />
+            ))}
           </div>
-          {quarterMatches.slice(2, 4).map((match) => (
-            <MatchBox key={match.id} match={match} />
-          ))}
         </div>
 
-        <div className="flex flex-col justify-center space-y-8">
-          <div className="text-center mb-4 md:mb-0 md:absolute md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 relative">
+        <div>
+          <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-primary tracking-tight">ПОЛУФИНАЛ</h2>
             <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
           </div>
-          {semiMatches.map((match) => (
-            <MatchBox key={match.id} match={match} />
-          ))}
+          <div className="space-y-32 mt-12">
+            {semiMatches.map((match) => (
+              <MatchBox key={match.id} match={match} />
+            ))}
+          </div>
         </div>
 
-        <div className="flex flex-col justify-center">
-          <div className="text-center mb-4 md:mb-8">
+        <div>
+          <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-primary tracking-tight">ФИНАЛ</h2>
             <div className="h-1 w-16 bg-accent mx-auto mt-2 rounded-full"></div>
           </div>
-          {finalMatch ? (
-            <MatchBox match={finalMatch} className="shadow-lg" />
-          ) : (
-            <Card className="p-8 text-center border-dashed">
-              <Icon name="Trophy" size={32} className="mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Финал не сформирован</p>
-            </Card>
-          )}
+          <div className="flex items-center justify-center" style={{ minHeight: '400px' }}>
+            {finalMatch ? (
+              <MatchBox match={finalMatch} className="shadow-xl w-full" />
+            ) : (
+              <Card className="p-8 text-center border-dashed w-full">
+                <Icon name="Trophy" size={40} className="mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">Финал не сформирован</p>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>
