@@ -24,101 +24,88 @@ interface TournamentBracketProps {
 }
 
 const TournamentBracket = ({ matches }: TournamentBracketProps) => {
-  const rounds = ['quarter', 'semi', 'final'];
-  
-  const getMatchesByRound = (round: string) => {
-    return matches.filter(m => m.round === round).sort((a, b) => a.match_number - b.match_number);
-  };
+  const quarterMatches = matches.filter(m => m.round === 'quarter').sort((a, b) => a.match_number - b.match_number);
+  const semiMatches = matches.filter(m => m.round === 'semi').sort((a, b) => a.match_number - b.match_number);
+  const finalMatch = matches.find(m => m.round === 'final');
 
-  const getRoundTitle = (round: string) => {
-    switch(round) {
-      case 'quarter': return 'ЧЕТВЕРТЬФИНАЛ';
-      case 'semi': return 'ПОЛУФИНАЛ';
-      case 'final': return 'ФИНАЛ';
-      default: return round.toUpperCase();
-    }
-  };
+  const TeamRow = ({ team, score, isWinner, isFinished }: { team?: Team; score: number; isWinner: boolean; isFinished: boolean }) => (
+    <div className={`flex items-center justify-between px-3 py-2 rounded-md border ${isWinner && isFinished ? 'bg-success/10 border-success' : 'bg-card border-border'}`}>
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <Icon name="Users" size={12} className="text-primary" />
+        </div>
+        <span className={`text-sm font-medium ${isWinner && isFinished ? 'text-success font-semibold' : 'text-foreground'}`}>
+          {team?.name || 'TBD'}
+        </span>
+      </div>
+      <span className={`text-lg font-bold ${isWinner && isFinished ? 'text-success' : 'text-muted-foreground'} min-w-[1.5rem] text-right`}>
+        {isFinished ? score : '-'}
+      </span>
+    </div>
+  );
 
-  const MatchCard = ({ match }: { match: Match }) => {
+  const MatchBox = ({ match, className = '' }: { match: Match; className?: string }) => {
+    const isFinished = match.status === 'finished';
     const team1Won = match.winner_id === match.team1?.id;
     const team2Won = match.winner_id === match.team2?.id;
-    const isFinished = match.status === 'finished';
 
     return (
-      <Card className="p-3 bg-card border-2 hover:border-primary transition-all duration-200 relative">
-        <div className="space-y-1">
-          <div className={`flex items-center justify-between p-2.5 rounded-lg ${team1Won && isFinished ? 'bg-success/10 border border-success' : 'bg-secondary/50'}`}>
-            <div className="flex items-center gap-2 flex-1">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Icon name="Users" size={14} className="text-primary" />
-              </div>
-              <span className={`font-semibold text-sm ${team1Won && isFinished ? 'text-success' : 'text-foreground'}`}>
-                {match.team1?.name || 'TBD'}
-              </span>
-            </div>
-            <span className={`text-xl font-bold ${team1Won && isFinished ? 'text-success' : 'text-muted-foreground'} min-w-[2rem] text-center`}>
-              {isFinished ? match.team1_score : '-'}
-            </span>
-          </div>
-
-          <div className={`flex items-center justify-between p-2.5 rounded-lg ${team2Won && isFinished ? 'bg-success/10 border border-success' : 'bg-secondary/50'}`}>
-            <div className="flex items-center gap-2 flex-1">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Icon name="Users" size={14} className="text-primary" />
-              </div>
-              <span className={`font-semibold text-sm ${team2Won && isFinished ? 'text-success' : 'text-foreground'}`}>
-                {match.team2?.name || 'TBD'}
-              </span>
-            </div>
-            <span className={`text-xl font-bold ${team2Won && isFinished ? 'text-success' : 'text-muted-foreground'} min-w-[2rem] text-center`}>
-              {isFinished ? match.team2_score : '-'}
-            </span>
-          </div>
-
-          {isFinished && match.winner_id && (
-            <div className="flex items-center justify-center gap-2 mt-2 pt-2 border-t">
-              <Icon name="Trophy" size={12} className="text-success" />
-              <span className="text-xs font-semibold text-success">
-                {match.winner_id === match.team1?.id ? match.team1?.name : match.team2?.name}
-              </span>
-            </div>
-          )}
-        </div>
-      </Card>
+      <div className={`bg-secondary/30 rounded-lg p-2 border-2 border-border hover:border-primary/50 transition-colors ${className}`}>
+        <TeamRow team={match.team1} score={match.team1_score} isWinner={team1Won} isFinished={isFinished} />
+        <div className="h-1"></div>
+        <TeamRow team={match.team2} score={match.team2_score} isWinner={team2Won} isFinished={isFinished} />
+      </div>
     );
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-      {rounds.map((round) => {
-        const roundMatches = getMatchesByRound(round);
-        
-        return (
-          <div key={round}>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-primary tracking-tight">
-                {getRoundTitle(round)}
-              </h2>
-              <div className="h-1 w-16 bg-accent mx-auto mt-2 rounded-full"></div>
-            </div>
-            
-            <div className={`space-y-3 ${round === 'semi' ? 'mt-16' : round === 'final' ? 'mt-32' : ''}`}>
-              {roundMatches.length > 0 ? (
-                roundMatches.map((match, idx) => (
-                  <div key={match.id} className={round === 'semi' ? (idx === 0 ? '' : 'mt-6') : round === 'final' ? '' : (idx % 2 === 0 && idx !== 0 ? 'mt-6' : '')}>
-                    <MatchCard match={match} />
-                  </div>
-                ))
-              ) : (
-                <Card className="p-8 text-center border-dashed">
-                  <Icon name="Calendar" size={32} className="mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Матчи не сформированы</p>
-                </Card>
-              )}
-            </div>
+    <div className="w-full max-w-[1400px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_1.2fr] gap-4">
+        <div className="space-y-3">
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-bold text-primary tracking-tight">ЧЕТВЕРТЬФИНАЛ</h2>
+            <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
           </div>
-        );
-      })}
+          {quarterMatches.slice(0, 2).map((match) => (
+            <MatchBox key={match.id} match={match} />
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-bold text-primary tracking-tight opacity-0">ЧЕТВЕРТЬФИНАЛ</h2>
+            <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full opacity-0"></div>
+          </div>
+          {quarterMatches.slice(2, 4).map((match) => (
+            <MatchBox key={match.id} match={match} />
+          ))}
+        </div>
+
+        <div className="flex flex-col justify-center space-y-8">
+          <div className="text-center mb-4 md:mb-0 md:absolute md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 relative">
+            <h2 className="text-xl font-bold text-primary tracking-tight">ПОЛУФИНАЛ</h2>
+            <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
+          </div>
+          {semiMatches.map((match) => (
+            <MatchBox key={match.id} match={match} />
+          ))}
+        </div>
+
+        <div className="flex flex-col justify-center">
+          <div className="text-center mb-4 md:mb-8">
+            <h2 className="text-2xl font-bold text-primary tracking-tight">ФИНАЛ</h2>
+            <div className="h-1 w-16 bg-accent mx-auto mt-2 rounded-full"></div>
+          </div>
+          {finalMatch ? (
+            <MatchBox match={finalMatch} className="shadow-lg" />
+          ) : (
+            <Card className="p-8 text-center border-dashed">
+              <Icon name="Trophy" size={32} className="mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">Финал не сформирован</p>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
