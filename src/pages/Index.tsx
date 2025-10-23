@@ -29,8 +29,8 @@ const Index = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchMatches = async () => {
-    setLoading(true);
+  const fetchMatches = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const response = await fetch(funcUrls['get-matches']);
       const data = await response.json();
@@ -38,12 +38,19 @@ const Index = () => {
     } catch (error) {
       console.error('Error fetching matches:', error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchMatches();
+    
+    // Автоматическое обновление каждые 5 секунд (без индикатора загрузки)
+    const interval = setInterval(() => {
+      fetchMatches(false);
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -91,7 +98,7 @@ const Index = () => {
             <Icon name="Award" size={16} />
             <span>Турнирная система 5 на 5</span>
           </div>
-          <p>Автоматическая генерация • Плей-офф • 8 команд</p>
+          <p>Автоматическая генерация • Плей-офф • 32 команды • Обновление каждые 5 сек</p>
         </footer>
       </div>
       <Toaster />
