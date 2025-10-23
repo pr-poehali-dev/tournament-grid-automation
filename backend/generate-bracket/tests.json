@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "Generate bracket successfully",
+      "method": "POST",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "matchesCreated": 7,
+        "teamsSeeded": 8
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Handle OPTIONS request",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}
