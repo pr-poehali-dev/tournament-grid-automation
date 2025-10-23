@@ -48,16 +48,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'body': json.dumps({'error': 'tournament_id or tournament_url required'})
         }
     
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Accept': 'application/json'
-    }
+    tournament_url = f'https://api.challonge.com/v1/tournaments/{tournament_id}.json?api_key={api_key}'
+    matches_url = f'https://api.challonge.com/v1/tournaments/{tournament_id}/matches.json?api_key={api_key}'
+    participants_url = f'https://api.challonge.com/v1/tournaments/{tournament_id}/participants.json?api_key={api_key}'
     
-    tournament_url = f'https://api.challonge.com/v1/tournaments/{tournament_id}.json'
-    matches_url = f'https://api.challonge.com/v1/tournaments/{tournament_id}/matches.json'
-    participants_url = f'https://api.challonge.com/v1/tournaments/{tournament_id}/participants.json'
-    
-    tournament_data = requests.get(tournament_url, headers=headers)
+    tournament_data = requests.get(tournament_url)
     if tournament_data.status_code != 200:
         return {
             'statusCode': tournament_data.status_code,
@@ -65,8 +60,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'body': json.dumps({'error': f'Challonge API error: {tournament_data.text}'})
         }
     
-    matches_data = requests.get(matches_url, headers=headers)
-    participants_data = requests.get(participants_url, headers=headers)
+    matches_data = requests.get(matches_url)
+    participants_data = requests.get(participants_url)
     
     tournament = tournament_data.json()
     matches = matches_data.json() if matches_data.status_code == 200 else []
