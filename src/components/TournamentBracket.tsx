@@ -91,7 +91,7 @@ const TournamentBracket = ({ matches }: TournamentBracketProps) => {
             <h2 className="text-2xl font-bold text-primary tracking-tight">ФИНАЛ</h2>
             <div className="h-1 w-16 bg-accent mx-auto mt-2 rounded-full"></div>
           </div>
-          <div className="flex items-center justify-center" style={{ minHeight: '400px' }}>
+          <div className="flex items-center justify-center my-[91px] py-0" style={{ minHeight: '400px' }}>
             {finalMatch ? (
               <MatchBox match={finalMatch} className="shadow-xl w-full" />
             ) : (
