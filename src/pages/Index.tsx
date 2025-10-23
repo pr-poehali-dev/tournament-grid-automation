@@ -32,11 +32,31 @@ const Index = () => {
   const fetchMatches = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      const response = await fetch(funcUrls['get-matches']);
-      const data = await response.json();
-      setMatches(data.matches || []);
+      const challongeTournamentId = localStorage.getItem('challonge_tournament_id');
+      
+      if (challongeTournamentId) {
+        const response = await fetch(`${funcUrls['challonge-sync']}?tournament_id=${encodeURIComponent(challongeTournamentId)}`);
+        const data = await response.json();
+        if (response.ok) {
+          setMatches(data.matches || []);
+          localStorage.setItem('challonge_matches', JSON.stringify(data.matches || []));
+        } else {
+          const cachedMatches = localStorage.getItem('challonge_matches');
+          if (cachedMatches) {
+            setMatches(JSON.parse(cachedMatches));
+          }
+        }
+      } else {
+        const response = await fetch(funcUrls['get-matches']);
+        const data = await response.json();
+        setMatches(data.matches || []);
+      }
     } catch (error) {
       console.error('Error fetching matches:', error);
+      const cachedMatches = localStorage.getItem('challonge_matches');
+      if (cachedMatches) {
+        setMatches(JSON.parse(cachedMatches));
+      }
     } finally {
       if (showLoading) setLoading(false);
     }
@@ -45,7 +65,6 @@ const Index = () => {
   useEffect(() => {
     fetchMatches();
     
-    // Автоматическое обновление каждые 5 секунд (без индикатора загрузки)
     const interval = setInterval(() => {
       fetchMatches(false);
     }, 5000);
