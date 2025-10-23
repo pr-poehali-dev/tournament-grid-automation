@@ -35,9 +35,16 @@ const Index = () => {
     if (showLoading) setLoading(true);
     try {
       const challongeTournamentId = localStorage.getItem('challonge_tournament_id');
+      const iframeMode = localStorage.getItem('challonge_iframe_mode');
       
       if (!challongeTournamentId) {
         setMatches([]);
+        if (showLoading) setLoading(false);
+        return;
+      }
+
+      if (iframeMode === 'true') {
+        setTournamentId(challongeTournamentId);
         if (showLoading) setLoading(false);
         return;
       }
@@ -102,6 +109,30 @@ const Index = () => {
           <div className="flex flex-col items-center justify-center py-20">
             <Icon name="Loader2" size={48} className="animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">Загрузка турнирной сетки...</p>
+          </div>
+        ) : tournamentId && localStorage.getItem('challonge_iframe_mode') === 'true' ? (
+          <div className="animate-fade-in">
+            <div className="mb-6 flex items-center justify-center gap-4 text-sm">
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                <Icon name="Link" size={16} className="text-primary" />
+                <span className="font-medium">Турнир: {tournamentId}</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-lg border border-accent/20">
+                <Icon name="ExternalLink" size={16} className="text-accent" />
+                <span className="text-muted-foreground">Iframe режим</span>
+              </div>
+            </div>
+            <div className="max-w-6xl mx-auto bg-card rounded-lg border-2 border-border overflow-hidden shadow-xl">
+              <iframe 
+                src={`https://challonge.com/${tournamentId}/module`}
+                width="100%" 
+                height="700" 
+                frameBorder="0" 
+                scrolling="auto" 
+                allowTransparency={true}
+                className="w-full"
+              />
+            </div>
           </div>
         ) : matches.length === 0 ? (
           <div className="text-center py-20">

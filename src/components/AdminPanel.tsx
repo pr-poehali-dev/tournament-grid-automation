@@ -14,6 +14,7 @@ const AdminPanel = ({ onBracketGenerated }: AdminPanelProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [tournamentUrl, setTournamentUrl] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [useIframe, setUseIframe] = useState(false);
   const { toast } = useToast();
 
   const generateBracket = async () => {
@@ -59,16 +60,29 @@ const AdminPanel = ({ onBracketGenerated }: AdminPanelProps) => {
       return;
     }
 
+    const tournamentId = tournamentUrl.split('/').pop() || tournamentUrl;
+
+    if (useIframe) {
+      localStorage.setItem('challonge_tournament_id', tournamentId);
+      localStorage.setItem('challonge_iframe_mode', 'true');
+      toast({
+        title: "Режим iframe активирован!",
+        description: `Турнир ${tournamentId} будет отображаться через встроенный виджет Challonge`,
+      });
+      onBracketGenerated();
+      return;
+    }
+
     setIsSyncing(true);
     
     try {
-      const tournamentId = tournamentUrl.split('/').pop() || tournamentUrl;
       const response = await fetch(`${funcUrls['challonge-sync']}?tournament_id=${encodeURIComponent(tournamentId)}`);
       const data = await response.json();
 
       if (response.ok) {
         localStorage.setItem('challonge_tournament_id', tournamentId);
         localStorage.setItem('challonge_matches', JSON.stringify(data.matches || []));
+        localStorage.removeItem('challonge_iframe_mode');
         
         toast({
           title: "Синхронизация выполнена!",
@@ -76,7 +90,11 @@ const AdminPanel = ({ onBracketGenerated }: AdminPanelProps) => {
         });
         onBracketGenerated();
       } else {
-        throw new Error(data.error || 'Ошибка синхронизации с Challonge');
+        toast({
+          title: "Ошибка API",
+          description: data.help || data.error || 'Не удалось подключиться к Challonge API',
+          variant: "destructive",
+        });
       }
     } catch (error) {
       toast({
@@ -134,11 +152,22 @@ const AdminPanel = ({ onBracketGenerated }: AdminPanelProps) => {
               )}
             </Button>
           </div>
-          <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <Icon name="Info" size={14} className="mt-0.5 shrink-0" />
-            <div>
-              <p className="mb-1">Пример: https://challonge.com/my_tournament или просто my_tournament</p>
-              <p>После подключения сетка будет автоматически обновляться каждые 3 секунды</p>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={useIframe}
+                onChange={(e) => setUseIframe(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <span className="text-muted-foreground">Использовать iframe режим (если API не работает)</span>
+            </label>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <Icon name="Info" size={14} className="mt-0.5 shrink-0" />
+              <div>
+                <p className="mb-1">Пример: https://challonge.com/my_tournament или просто my_tournament</p>
+                <p>{useIframe ? 'В iframe режиме будет показан виджет Challonge' : 'После подключения сетка будет автоматически обновляться каждые 3 секунды'}</p>
+              </div>
             </div>
           </div>
         </div>
