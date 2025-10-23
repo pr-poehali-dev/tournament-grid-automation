@@ -62,52 +62,90 @@ const TournamentBracket = ({ matches }: TournamentBracketProps) => {
   return (
     <div className="w-full overflow-x-auto">
       <div className="min-w-[1400px] mx-auto px-4">
-        <div className="grid grid-cols-5 gap-6">
+        <div className="grid grid-cols-5 gap-0 relative">
           
-          <div>
+          <div className="relative z-10 px-3">
             <div className="text-center mb-6">
               <h2 className="text-lg font-bold text-primary tracking-tight">1/8 ФИНАЛА</h2>
               <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
             </div>
             <div className="space-y-4">
-              {round16Matches.map((match) => (
-                <MatchBox key={match.id} match={match} />
+              {round16Matches.map((match, idx) => (
+                <div key={match.id} className="relative">
+                  <MatchBox match={match} />
+                  {idx % 2 === 1 && (
+                    <div className="absolute top-1/2 -translate-y-1/2 left-full w-6 h-0.5 bg-border"></div>
+                  )}
+                  {idx % 2 === 0 && idx < round16Matches.length - 1 && (
+                    <>
+                      <div className="absolute top-1/2 left-full w-6 h-0.5 bg-border"></div>
+                      <div className="absolute top-1/2 left-[calc(100%+1.5rem)] w-0.5 bg-border" style={{ height: 'calc(100% + 1rem + 50%)' }}></div>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
           </div>
 
-          <div>
+          <div className="relative z-10 px-3">
             <div className="text-center mb-6">
               <h2 className="text-lg font-bold text-primary tracking-tight">ЧЕТВЕРТЬФИНАЛ</h2>
               <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
             </div>
             <div className="space-y-[76px] mt-[50px]">
-              {quarterMatches.map((match) => (
-                <MatchBox key={match.id} match={match} />
+              {quarterMatches.map((match, idx) => (
+                <div key={match.id} className="relative">
+                  <MatchBox match={match} />
+                  {idx % 2 === 1 && (
+                    <div className="absolute top-1/2 -translate-y-1/2 left-full w-6 h-0.5 bg-border"></div>
+                  )}
+                  {idx % 2 === 0 && idx < quarterMatches.length - 1 && (
+                    <>
+                      <div className="absolute top-1/2 left-full w-6 h-0.5 bg-border"></div>
+                      <div className="absolute top-1/2 left-[calc(100%+1.5rem)] w-0.5 bg-border" style={{ height: 'calc(100% + 4.75rem + 50%)' }}></div>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
           </div>
 
-          <div>
+          <div className="relative z-10 px-3">
             <div className="text-center mb-6">
               <h2 className="text-lg font-bold text-primary tracking-tight">ПОЛУФИНАЛ</h2>
               <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
             </div>
             <div className="space-y-[236px] mt-[126px]">
-              {semiMatches.map((match) => (
-                <MatchBox key={match.id} match={match} />
+              {semiMatches.map((match, idx) => (
+                <div key={match.id} className="relative">
+                  <MatchBox match={match} />
+                  {idx % 2 === 1 && (
+                    <div className="absolute top-1/2 -translate-y-1/2 left-full w-6 h-0.5 bg-border"></div>
+                  )}
+                  {idx % 2 === 0 && idx < semiMatches.length - 1 && (
+                    <>
+                      <div className="absolute top-1/2 left-full w-6 h-0.5 bg-border"></div>
+                      <div className="absolute top-1/2 left-[calc(100%+1.5rem)] w-0.5 bg-border" style={{ height: 'calc(100% + 14.75rem + 50%)' }}></div>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
           </div>
 
-          <div>
+          <div className="relative z-10 px-3">
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-primary tracking-tight">ФИНАЛ</h2>
               <div className="h-1 w-16 bg-accent mx-auto mt-2 rounded-full"></div>
             </div>
-            <div className="flex items-center justify-center" style={{ minHeight: '500px', paddingTop: '180px' }}>
+            <div className="flex items-center justify-center relative" style={{ minHeight: '500px', paddingTop: '180px' }}>
               {finalMatch ? (
-                <MatchBox match={finalMatch} className="shadow-xl w-full" />
+                <>
+                  <MatchBox match={finalMatch} className="shadow-xl w-full" />
+                  {finalMatch.status === 'finished' && finalMatch.winner_id && (
+                    <div className="absolute top-1/2 -translate-y-1/2 left-full w-6 h-0.5 bg-border"></div>
+                  )}
+                </>
               ) : (
                 <Card className="p-8 text-center border-dashed w-full">
                   <Icon name="Trophy" size={40} className="mx-auto text-muted-foreground mb-2" />
@@ -117,7 +155,7 @@ const TournamentBracket = ({ matches }: TournamentBracketProps) => {
             </div>
           </div>
 
-          <div>
+          <div className="relative z-10 px-3">
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-primary tracking-tight">ПОБЕДИТЕЛЬ</h2>
               <div className="h-1 w-16 bg-accent mx-auto mt-2 rounded-full"></div>
