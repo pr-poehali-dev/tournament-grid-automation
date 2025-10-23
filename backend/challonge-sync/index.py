@@ -54,10 +54,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     tournament_data = requests.get(tournament_url)
     if tournament_data.status_code != 200:
+        error_msg = f'Challonge API error (status {tournament_data.status_code}): {tournament_data.text}'
+        print(f'ERROR: {error_msg}')
+        print(f'Request URL: {tournament_url}')
         return {
-            'statusCode': tournament_data.status_code,
+            'statusCode': 400,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': f'Challonge API error: {tournament_data.text}'})
+            'body': json.dumps({
+                'error': error_msg,
+                'tournament_id': tournament_id,
+                'help': 'Проверьте: 1) Правильность ID турнира, 2) API ключ Challonge, 3) Турнир должен быть публичным'
+            })
         }
     
     matches_data = requests.get(matches_url)
