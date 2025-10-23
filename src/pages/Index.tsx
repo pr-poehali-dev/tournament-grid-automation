@@ -28,28 +28,33 @@ interface Match {
 const Index = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tournamentId, setTournamentId] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchMatches = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
       const challongeTournamentId = localStorage.getItem('challonge_tournament_id');
       
-      if (challongeTournamentId) {
-        const response = await fetch(`${funcUrls['challonge-sync']}?tournament_id=${encodeURIComponent(challongeTournamentId)}`);
-        const data = await response.json();
-        if (response.ok) {
-          setMatches(data.matches || []);
-          localStorage.setItem('challonge_matches', JSON.stringify(data.matches || []));
-        } else {
-          const cachedMatches = localStorage.getItem('challonge_matches');
-          if (cachedMatches) {
-            setMatches(JSON.parse(cachedMatches));
-          }
-        }
-      } else {
-        const response = await fetch(funcUrls['get-matches']);
-        const data = await response.json();
+      if (!challongeTournamentId) {
+        setMatches([]);
+        if (showLoading) setLoading(false);
+        return;
+      }
+      
+      const response = await fetch(`${funcUrls['challonge-sync']}?tournament_id=${encodeURIComponent(challongeTournamentId)}`);
+      const data = await response.json();
+      
+      if (response.ok) {
         setMatches(data.matches || []);
+        setTournamentId(challongeTournamentId);
+        setLastUpdate(new Date());
+        localStorage.setItem('challonge_matches', JSON.stringify(data.matches || []));
+      } else {
+        const cachedMatches = localStorage.getItem('challonge_matches');
+        if (cachedMatches) {
+          setMatches(JSON.parse(cachedMatches));
+        }
       }
     } catch (error) {
       console.error('Error fetching matches:', error);
@@ -67,7 +72,7 @@ const Index = () => {
     
     const interval = setInterval(() => {
       fetchMatches(false);
-    }, 5000);
+    }, 3000);
     
     return () => clearInterval(interval);
   }, []);
@@ -85,7 +90,7 @@ const Index = () => {
             ТУРНИРНАЯ СЕТКА
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Профессиональная система управления турниром с автоматической генерацией сетки
+            Прямая трансляция турнирной сетки с Challonge в реальном времени
           </p>
         </header>
 
@@ -101,13 +106,29 @@ const Index = () => {
         ) : matches.length === 0 ? (
           <div className="text-center py-20">
             <Icon name="AlertCircle" size={64} className="mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Турнирная сетка не создана</h2>
+            <h2 className="text-2xl font-bold mb-2">Турнир не подключен</h2>
             <p className="text-muted-foreground mb-6">
-              Используйте админ-панель выше для формирования сетки турнира
+              Введите ID турнира Challonge в поле выше для загрузки сетки
             </p>
           </div>
         ) : (
           <div className="animate-fade-in">
+            {tournamentId && (
+              <div className="mb-6 flex items-center justify-center gap-4 text-sm">
+                <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                  <Icon name="Link" size={16} className="text-primary" />
+                  <span className="font-medium">Турнир: {tournamentId}</span>
+                </div>
+                {lastUpdate && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-success/10 rounded-lg border border-success/20">
+                    <Icon name="RefreshCw" size={16} className="text-success animate-spin-slow" />
+                    <span className="text-muted-foreground">
+                      Обновлено: {lastUpdate.toLocaleTimeString('ru-RU')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
             <TournamentBracket matches={matches} />
           </div>
         )}
@@ -117,7 +138,7 @@ const Index = () => {
             <Icon name="Award" size={16} />
             <span>Турнирная система 5 на 5</span>
           </div>
-          <p>Автоматическая генерация • Плей-офф • 32 команды • Обновление каждые 5 сек</p>
+          <p>Challonge Integration • Live Updates • Обновление каждые 3 сек</p>
         </footer>
       </div>
       <Toaster />
