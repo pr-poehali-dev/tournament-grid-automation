@@ -29,22 +29,29 @@ const Index = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [tournamentId, setTournamentId] = useState<string | null>(null);
+  const [iframeMode, setIframeMode] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchMatches = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      const challongeTournamentId = localStorage.getItem('challonge_tournament_id');
-      const iframeMode = localStorage.getItem('challonge_iframe_mode');
+      const settingsResponse = await fetch(funcUrls['get-settings']);
+      const settings = await settingsResponse.json();
+      
+      const challongeTournamentId = settings.tournament_id;
+      const iframeMode = settings.iframe_mode;
       
       if (!challongeTournamentId) {
         setMatches([]);
+        setTournamentId(null);
         if (showLoading) setLoading(false);
         return;
       }
 
-      if (iframeMode === 'true') {
-        setTournamentId(challongeTournamentId);
+      setTournamentId(challongeTournamentId);
+      setIframeMode(iframeMode);
+
+      if (iframeMode) {
         if (showLoading) setLoading(false);
         return;
       }
@@ -54,21 +61,10 @@ const Index = () => {
       
       if (response.ok) {
         setMatches(data.matches || []);
-        setTournamentId(challongeTournamentId);
         setLastUpdate(new Date());
-        localStorage.setItem('challonge_matches', JSON.stringify(data.matches || []));
-      } else {
-        const cachedMatches = localStorage.getItem('challonge_matches');
-        if (cachedMatches) {
-          setMatches(JSON.parse(cachedMatches));
-        }
       }
     } catch (error) {
       console.error('Error fetching matches:', error);
-      const cachedMatches = localStorage.getItem('challonge_matches');
-      if (cachedMatches) {
-        setMatches(JSON.parse(cachedMatches));
-      }
     } finally {
       if (showLoading) setLoading(false);
     }
@@ -110,7 +106,7 @@ const Index = () => {
             <Icon name="Loader2" size={48} className="animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">Загрузка турнирной сетки...</p>
           </div>
-        ) : tournamentId && localStorage.getItem('challonge_iframe_mode') === 'true' ? (
+        ) : tournamentId && iframeMode ? (
           <div className="animate-fade-in">
             <div className="mb-6 flex items-center justify-center gap-4 text-sm">
               <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">

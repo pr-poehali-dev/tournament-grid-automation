@@ -1,0 +1,15 @@
+{
+  "tests": [
+    {
+      "name": "GET settings returns tournament config",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "tournament_id": "string|null",
+        "iframe_mode": "boolean"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

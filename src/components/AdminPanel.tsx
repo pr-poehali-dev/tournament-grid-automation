@@ -61,45 +61,50 @@ const AdminPanel = ({ onBracketGenerated }: AdminPanelProps) => {
     }
 
     const tournamentId = tournamentUrl.split('/').pop() || tournamentUrl;
-
-    if (useIframe) {
-      localStorage.setItem('challonge_tournament_id', tournamentId);
-      localStorage.setItem('challonge_iframe_mode', 'true');
-      toast({
-        title: "Режим iframe активирован!",
-        description: `Турнир ${tournamentId} будет отображаться через встроенный виджет Challonge`,
-      });
-      onBracketGenerated();
-      return;
-    }
-
     setIsSyncing(true);
     
     try {
-      const response = await fetch(`${funcUrls['challonge-sync']}?tournament_id=${encodeURIComponent(tournamentId)}`);
-      const data = await response.json();
+      const updateResponse = await fetch(funcUrls['update-settings'], {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tournament_id: tournamentId,
+          iframe_mode: useIframe
+        })
+      });
 
-      if (response.ok) {
-        localStorage.setItem('challonge_tournament_id', tournamentId);
-        localStorage.setItem('challonge_matches', JSON.stringify(data.matches || []));
-        localStorage.removeItem('challonge_iframe_mode');
-        
-        toast({
-          title: "Синхронизация выполнена!",
-          description: `Загружено ${data.matches?.length || 0} матчей из Challonge`,
-        });
-        onBracketGenerated();
-      } else {
-        toast({
-          title: "Ошибка API",
-          description: data.help || data.error || 'Не удалось подключиться к Challonge API',
-          variant: "destructive",
-        });
+      if (!updateResponse.ok) {
+        throw new Error('Не удалось сохранить настройки');
       }
+
+      if (useIframe) {
+        toast({
+          title: "Турнир подключен!",
+          description: `Турнир ${tournamentId} будет виден всем через iframe`,
+        });
+      } else {
+        const response = await fetch(`${funcUrls['challonge-sync']}?tournament_id=${encodeURIComponent(tournamentId)}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          toast({
+            title: "Турнир подключен!",
+            description: `Загружено ${data.matches?.length || 0} матчей. Все пользователи видят сетку`,
+          });
+        } else {
+          toast({
+            title: "Ошибка API",
+            description: data.help || data.error || 'Не удалось подключиться к Challonge API',
+            variant: "destructive",
+          });
+        }
+      }
+      
+      onBracketGenerated();
     } catch (error) {
       toast({
         title: "Ошибка",
-        description: error instanceof Error ? error.message : 'Не удалось синхронизировать с Challonge',
+        description: error instanceof Error ? error.message : 'Не удалось подключить турнир',
         variant: "destructive",
       });
     } finally {

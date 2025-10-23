@@ -1,0 +1,18 @@
+{
+  "tests": [
+    {
+      "name": "POST updates tournament settings",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "tournament_id": "test123",
+        "iframe_mode": true
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
