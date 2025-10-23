@@ -79,7 +79,7 @@ const TournamentBracket = ({ matches }: TournamentBracketProps) => {
             <h2 className="text-xl font-bold text-primary tracking-tight">ПОЛУФИНАЛ</h2>
             <div className="h-1 w-12 bg-accent mx-auto mt-1 rounded-full"></div>
           </div>
-          <div className="space-y-32 mt-24">
+          <div className="space-y-32 py-[59px] my-[113px]">
             {semiMatches.map((match) => (
               <MatchBox key={match.id} match={match} />
             ))}
